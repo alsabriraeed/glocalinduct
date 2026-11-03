@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+*.log
+
+# Sensitive credentials
+.env
+**/.env
+.env.*
+**/.env.*
+
+# Heavy runtime data & workspace (18 GB - Upload light subfolders only)
+workspace/
+workspace/**
+data/
+data/**
+scratch/
+scratch/**
+storage/
+storage/**
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.bak

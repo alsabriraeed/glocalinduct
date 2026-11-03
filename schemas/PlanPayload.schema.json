@@ -1,0 +1,334 @@
+{
+  "$defs": {
+    "Decision": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "minLength": 1,
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "item_id": {
+          "minLength": 1,
+          "title": "Item Id",
+          "type": "string"
+        },
+        "strategy": {
+          "enum": [
+            "retain",
+            "substitute"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "counterpart_ar": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Counterpart Ar"
+        },
+        "canonical_concept": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Canonical Concept"
+        },
+        "term_policy": {
+          "enum": [
+            "fixed",
+            "inflectable"
+          ],
+          "title": "Term Policy",
+          "type": "string"
+        },
+        "support": {
+          "items": {
+            "$ref": "#/$defs/SupportRef"
+          },
+          "title": "Support",
+          "type": "array"
+        },
+        "insight_refs": {
+          "items": {
+            "$ref": "#/$defs/InsightRef"
+          },
+          "title": "Insight Refs",
+          "type": "array"
+        },
+        "preserve_requirement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Preserve Requirement Ids",
+          "type": "array"
+        },
+        "dependent_edits": {
+          "items": {
+            "$ref": "#/$defs/DependentEdit"
+          },
+          "title": "Dependent Edits",
+          "type": "array"
+        },
+        "fallback_reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fallback Reason"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "item_id",
+        "strategy",
+        "counterpart_ar",
+        "canonical_concept",
+        "term_policy",
+        "support",
+        "insight_refs",
+        "preserve_requirement_ids",
+        "dependent_edits",
+        "fallback_reason",
+        "rationale"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "DependentEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "source_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "minItems": 1,
+          "title": "Source Quotes",
+          "type": "array"
+        },
+        "related_item_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Related Item Ids",
+          "type": "array"
+        },
+        "preserve_requirement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Preserve Requirement Ids",
+          "type": "array"
+        },
+        "adjustment": {
+          "minLength": 1,
+          "title": "Adjustment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_quotes",
+        "related_item_ids",
+        "preserve_requirement_ids",
+        "adjustment"
+      ],
+      "title": "DependentEdit",
+      "type": "object"
+    },
+    "InsightRef": {
+      "additionalProperties": false,
+      "properties": {
+        "insight_id": {
+          "minLength": 1,
+          "title": "Insight Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "insight_id",
+        "version"
+      ],
+      "title": "InsightRef",
+      "type": "object"
+    },
+    "QuoteRef": {
+      "additionalProperties": false,
+      "properties": {
+        "text_key": {
+          "minLength": 1,
+          "title": "Text Key",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Block Id"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text_key",
+        "block_id",
+        "quote",
+        "occurrence"
+      ],
+      "title": "QuoteRef",
+      "type": "object"
+    },
+    "SupportRef": {
+      "additionalProperties": false,
+      "properties": {
+        "experience_id": {
+          "minLength": 1,
+          "title": "Experience Id",
+          "type": "string"
+        },
+        "arabic_quote": {
+          "$ref": "#/$defs/QuoteRef"
+        },
+        "compatible_function": {
+          "minLength": 1,
+          "title": "Compatible Function",
+          "type": "string"
+        }
+      },
+      "required": [
+        "experience_id",
+        "arabic_quote",
+        "compatible_function"
+      ],
+      "title": "SupportRef",
+      "type": "object"
+    },
+    "TermBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "source_concept": {
+          "minLength": 1,
+          "title": "Source Concept",
+          "type": "string"
+        },
+        "preferred_ar": {
+          "minLength": 1,
+          "title": "Preferred Ar",
+          "type": "string"
+        },
+        "item_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Item Ids",
+          "type": "array"
+        },
+        "policy": {
+          "enum": [
+            "fixed",
+            "inflectable"
+          ],
+          "title": "Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_concept",
+        "preferred_ar",
+        "item_ids",
+        "policy"
+      ],
+      "title": "TermBinding",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "decisions": {
+      "items": {
+        "$ref": "#/$defs/Decision"
+      },
+      "title": "Decisions",
+      "type": "array"
+    },
+    "terminology": {
+      "items": {
+        "$ref": "#/$defs/TermBinding"
+      },
+      "title": "Terminology",
+      "type": "array"
+    },
+    "reflection": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reflection"
+    },
+    "unresolved_issues": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Unresolved Issues",
+      "type": "array"
+    }
+  },
+  "required": [
+    "decisions",
+    "terminology",
+    "reflection",
+    "unresolved_issues"
+  ],
+  "title": "PlanPayload",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GlocalInduct Glocalization & Pipeline Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/inspector.css?v=ins3">
+<style>
+:root{
+  --paper:#F6F7F3; --panel:#FFFFFF; --ink:#16213A; --ink-2:#4B5566; --line:#D9DED6; --line-2:#EEF1EA;
+  --teal:#0E7C86; --teal-ink:#0A5A62; --teal-tint:#E3F2F3;
+  --plum:#5B4BC4; --plum-tint:#ECE9FA;
+  --ok:#2E7D4F; --ok-tint:#E4F3EA; --warn:#B7791F; --warn-tint:#FBF1DC; --bad:#B23A3A; --bad-tint:#F8E3E3;
+  --radius:6px; --font:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --font-ar:"IBM Plex Sans Arabic","Noto Naskh Arabic","Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
+a{color:var(--teal-ink)}
+button,input,select,textarea{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:18px;padding:14px 28px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20}
+header h1{font-size:20px;font-weight:600;letter-spacing:-.01em;margin:0;white-space:nowrap}
+header h1 span{font-family:var(--font-ar);font-weight:500;color:var(--ink-2);margin-inline-start:8px;font-size:16px}
+.spacer{flex:1}
+.nav-modes{display:flex;align-items:center;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:3px}
+.nav-btn{background:none;border:0;border-radius:4px;padding:6px 14px;font-size:13.5px;font-weight:500;cursor:pointer;color:var(--ink-2);transition:all .15s}
+.nav-btn:hover{color:var(--ink);background:rgba(0,0,0,0.03)}
+.nav-btn.active{background:var(--panel);color:var(--teal-ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;color:var(--ink-2);background:var(--panel)}
+.pill b{color:var(--ink);font-weight:500}
+.pill.demo{border-color:var(--warn);color:var(--warn);background:var(--warn-tint)}
+
+/* Workbench main */
+.workbench-main{display:grid;grid-template-columns:minmax(360px,5fr) minmax(420px,7fr);gap:20px;padding:20px 28px 40px;max-width:1500px;margin:0 auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.panel h2{font-size:15px;font-weight:600;margin:0;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.panel .body{padding:14px 16px}
+textarea{width:100%;min-height:260px;resize:vertical;border:1px solid var(--line);border-radius:var(--radius);padding:12px;background:#FBFCFA;line-height:1.55}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+.drop{margin-top:10px;border:1px dashed var(--line);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--ink-2);font-size:14px;background:#FBFCFA}
+.drop.over{border-color:var(--teal);background:var(--teal-tint)}
+.drop input{display:none}
+.drop .choose{color:var(--teal-ink);text-decoration:underline;cursor:pointer}
+.drop .clear{border:0;background:none;color:var(--ink-2);cursor:pointer;padding:2px 6px}
+.run{margin-top:18px;display:flex;align-items:center;gap:14px}
+#go{background:var(--teal);color:#fff;border:0;border-radius:var(--radius);padding:12px 22px;font-size:16px;font-weight:600;cursor:pointer;letter-spacing:.01em}
+#go:hover{background:var(--teal-ink)} #go:disabled{opacity:.55;cursor:progress}
+#go .ar{font-family:var(--font-ar);font-weight:500;margin-inline-start:10px;opacity:.85}
+.release{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}
+.release select{border:1px solid var(--line);border-radius:var(--radius);padding:5px 8px;background:#fff}
+
+/* result */
+.status{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line-2)}
+.status .word{font-size:20px;font-weight:600;line-height:1.2}
+.status .word.accepted{color:var(--ok)} .status .word.conservative{color:var(--warn)} .status .word.unresolved{color:var(--bad)}
+.status .why{font-size:13.5px;color:var(--ink-2)}
+.status .why ul{margin:4px 0 0;padding-left:18px}
+.status .usage{margin-inline-start:auto;font-size:12.5px;color:var(--ink-2);text-align:right;white-space:nowrap}
+.empty{padding:48px 24px;color:var(--ink-2);font-size:15px;line-height:1.7}
+.empty b{color:var(--ink);font-weight:500}
+.blocks{display:flex;flex-direction:column}
+.block{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--line-2)}
+.block:last-child{border-bottom:0}
+.block>div{padding:12px 16px}
+.block .en{border-inline-end:1px solid var(--line-2);color:var(--ink-2)}
+.block .ar{direction:rtl;text-align:right;font-family:var(--font-ar);font-size:16.5px;line-height:1.9}
+.block.heading .en,.block.heading .ar{font-weight:600;color:var(--ink);font-size:17px}
+.block.code .en,.block.code .ar{font-family:var(--font-mono);font-size:13.5px;white-space:pre-wrap;direction:ltr;text-align:left}
+.block .ar.missing{color:var(--bad);font-family:var(--font);font-size:14px;direction:ltr;text-align:left}
+mark{border-radius:3px;padding:0 2px;background:transparent}
+mark.substitute{background:var(--plum-tint);color:var(--plum);box-shadow:inset 0 -2px 0 var(--plum)}
+mark.retain{background:var(--teal-tint);color:var(--teal-ink);box-shadow:inset 0 -2px 0 var(--teal)}
+.legend{display:flex;gap:16px;padding:8px 16px;font-size:12.5px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+.legend mark{padding:0 6px}
+
+/* tabs */
+.tabs{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--line-2);margin-top:4px}
+.tabs button{border:0;background:none;padding:10px 12px;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:500}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--teal)}
+.tab{display:none;padding:14px 16px} .tab.active{display:block}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:500;color:var(--ink-2);padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line-2);vertical-align:top}
+td .ar{font-family:var(--font-ar);direction:rtl;display:inline-block}
+.chip{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12.5px;border:1px solid var(--line);color:var(--ink-2)}
+.chip.substitute{background:var(--plum-tint);color:var(--plum);border-color:transparent}
+.chip.retain{background:var(--teal-tint);color:var(--teal-ink);border-color:transparent}
+.chip.essential{background:var(--bad-tint);color:var(--bad);border-color:transparent}
+.chip.incidental{background:var(--ok-tint);color:var(--ok);border-color:transparent}
+.chip.uncertain{background:var(--warn-tint);color:var(--warn);border-color:transparent}
+.chip.pass{background:var(--ok-tint);color:var(--ok);border-color:transparent}
+.chip.fail{background:var(--bad-tint);color:var(--bad);border-color:transparent}
+.chip.unknown,.chip.not_applicable{background:var(--warn-tint);color:var(--warn);border-color:transparent}
+.crit{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.crit .c{border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+.crit .name{font-weight:500;font-size:14px}
+.crit .score{font-size:30px;font-weight:600;line-height:1.1;margin:6px 0 4px}
+.crit .score small{font-size:13px;color:var(--ink-2);font-weight:400}
+.crit .meter{height:5px;background:var(--line-2);border-radius:3px;overflow:hidden;margin:6px 0 8px}
+.crit .meter i{display:block;height:100%;background:var(--ok)} .crit.fail .meter i{background:var(--bad)} .crit.unknown .meter i{background:var(--warn)}
+.crit p{margin:0;font-size:13px;color:var(--ink-2)}
+.findings{margin-top:14px} .finding{border-left:3px solid var(--bad);padding:6px 10px;margin:8px 0;background:#FBFBF9;font-size:13.5px}
+.finding.minor{border-left-color:var(--warn)}
+.mem h3{font-size:14px;font-weight:600;margin:10px 0 6px}
+.mem .card{border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;margin:8px 0;font-size:13.5px}
+.mem .card .ar{font-family:var(--font-ar);direction:rtl;text-align:right;display:block;margin-top:4px;color:var(--ink-2)}
+.mem .meta{color:var(--ink-2);font-size:12.5px}
+.note{font-size:13px;color:var(--ink-2)}
+pre{background:#F2F4EF;border:1px solid var(--line-2);border-radius:var(--radius);padding:12px;overflow:auto;font-size:12.5px;max-height:520px}
+.err{margin:12px 16px;border-left:3px solid var(--bad);background:var(--bad-tint);padding:10px 12px;font-size:14px}
+.disc-card{background:#F7FAF8;border:1px solid #D5E5DA;border-radius:var(--radius);padding:12px 14px;margin-bottom:14px}
+.disc-title{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:8px;color:var(--teal-ink)}
+.disc-tag{font-size:11px;font-weight:500;background:var(--teal-tint);color:var(--teal-ink);padding:2px 8px;border-radius:999px}
+.disc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px 16px;font-size:13px;margin-bottom:8px}
+.disc-grid b{color:var(--ink)}
+.disc-purpose{font-size:13px;color:var(--ink-2);border-top:1px dashed #D5E5DA;padding-top:6px;margin-top:6px}
+
+/* ========================================================================= */
+/* Workflow Dashboard Styles                                                 */
+/* ========================================================================= */
+.workflow-main{display:flex;flex-direction:column;gap:20px;padding:24px 28px 48px;max-width:1500px;margin:0 auto}
+
+.wf-hero-banner{background:linear-gradient(135deg, #0A5A62 0%, #0E7C86 100%);color:#fff;border-radius:var(--radius);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(10,90,98,0.18)}
+.wf-hero-text h3{margin:0 0 4px;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.wf-hero-text p{margin:0;font-size:13.5px;opacity:.92;max-width:720px;line-height:1.45}
+.wf-hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-hero{background:#fff;color:var(--teal-ink);border:0;border-radius:4px;padding:10px 18px;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 4px rgba(0,0,0,0.12);transition:all .15s}
+.btn-hero:hover{background:#F0F6F3;transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.16)}
+.btn-hero:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-secondary-white{background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-secondary-white:hover{background:rgba(255,255,255,0.28)}
+.btn-secondary-white:disabled{opacity:.6;cursor:not-allowed}
+
+/* Live Floating Banner */
+.live-banner{display:flex;align-items:center;gap:14px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:var(--radius);padding:12px 18px;position:sticky;top:62px;z-index:15;box-shadow:0 4px 14px rgba(245,158,11,0.25)}
+.live-banner.completed{background:#E4F3EA;border-color:#2E7D4F;box-shadow:0 4px 14px rgba(46,125,79,0.2)}
+.live-banner.error{background:#F8E3E3;border-color:#B23A3A;box-shadow:0 4px 14px rgba(178,58,58,0.2)}
+.live-dot{width:12px;height:12px;border-radius:50%;background:#F59E0B;flex-shrink:0}
+.live-dot.pulse{animation:pulseDot 1.2s infinite}
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.85)}}
+.live-banner.completed .live-dot{background:#2E7D4F;animation:none}
+.live-banner.error .live-dot{background:#B23A3A;animation:none}
+.live-text{display:flex;flex-direction:column;gap:1px}
+.live-text b{font-size:14px;color:#92400E}
+.live-banner.completed .live-text b{color:#14532D}
+.live-banner.error .live-text b{color:#7F1D1D}
+.live-text span{font-size:12.5px;color:var(--ink-2)}
+.btn-live-scroll{background:#0E7C86;color:#fff;border:0;border-radius:4px;padding:6px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-live-scroll:hover{background:#0A5A62}
+.btn-live-cancel{background:#DC2626;color:#fff;border:0;border-radius:4px;padding:6px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-live-cancel:hover{background:#B91C1C}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.stat-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px}
+.stat-card .label{font-size:12px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.stat-card .value{font-size:24px;font-weight:600;color:var(--ink);margin:4px 0 2px}
+.stat-card .sub{font-size:12.5px;color:var(--teal-ink)}
+
+.section-head{display:flex;align-items:baseline;justify-content:space-between;margin-top:4px}
+.section-head h2{font-size:17px;font-weight:600;margin:0}
+.section-head .sub{font-size:13px;color:var(--ink-2)}
+
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px}
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);display:flex;flex-direction:column;transition:border-color .15s, box-shadow .15s}
+.step-card:hover{border-color:var(--teal);box-shadow:0 3px 10px rgba(0,0,0,0.04)}
+.step-card-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--teal-tint);color:var(--teal-ink);font-weight:600;font-size:12px}
+.step-title{font-size:14.5px;font-weight:600;color:var(--ink);flex:1}
+.step-agent-badge{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--plum-tint);color:var(--plum);font-weight:500}
+.step-card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.step-cli{font-family:var(--font-mono);font-size:12px;background:#F1F4EE;padding:6px 10px;border-radius:4px;color:var(--ink);border:1px solid var(--line-2)}
+.step-card-footer{padding:12px 16px;border-top:1px solid var(--line-2);display:flex;align-items:center;justify-content:space-between;gap:10px;background:#FAFBFA;flex-wrap:wrap}
+.step-card-footer select{border:1px solid var(--line);border-radius:4px;padding:6px 8px;font-size:12.5px;background:#fff}
+.step-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-step{background:var(--teal);color:#fff;border:0;border-radius:4px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s}
+.btn-step:hover{background:var(--teal-ink)}
+.btn-step:disabled{opacity:.55;cursor:not-allowed}
+.btn-step.sample{background:#0B7285}
+.btn-step.sample:hover{background:#085361}
+.btn-step.secondary{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.btn-step.secondary:hover{background:var(--paper);border-color:var(--ink-2)}
+
+.run-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.run-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.run-field label{font-size:11.5px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.run-field select{border:1px solid var(--line);border-radius:4px;padding:8px 10px;font-size:13.5px;background:#fff;color:var(--ink);min-width:150px}
+.run-field.step-field select{min-width:340px}
+.run-field[hidden]{display:none}
+.run-note{font-size:12.5px;color:var(--ink-2);align-self:center;margin-inline-start:auto}
+
+/* Terminal Console */
+.terminal-panel{background:#0F172A;color:#E2E8F0;border-radius:var(--radius);border:2px solid #334155;overflow:hidden;margin-top:6px;box-shadow:0 4px 16px rgba(0,0,0,0.18);transition:border-color .2s, box-shadow .2s}
+.terminal-panel.active{border-color:#F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,0.25), 0 8px 24px rgba(0,0,0,0.25)}
+.terminal-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1E293B;border-bottom:1px solid #334155;font-size:13px}
+.terminal-title{display:flex;align-items:center;gap:10px;font-weight:600;font-family:var(--font-mono)}
+.term-dot{width:10px;height:10px;border-radius:50%;background:#10B981;display:inline-block}
+.term-dot.running{background:#F59E0B;box-shadow:0 0 10px #F59E0B;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+.terminal-actions{display:flex;align-items:center;gap:8px}
+.btn-term{background:#334155;color:#E2E8F0;border:0;border-radius:4px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s}
+.btn-term:hover{background:#475569}
+.btn-term.cancel{background:#DC2626;color:#fff}
+.btn-term.cancel:hover{background:#B91C1C}
+.btn-term:disabled{opacity:0.4;cursor:not-allowed}
+.terminal-body{padding:14px 16px;font-family:var(--font-mono);font-size:12.5px;line-height:1.6;height:350px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;background:#090D16}
+
+/* In-App Modal Dialog */
+.app-dialog-backdrop{position:fixed;inset:0;background:rgba(22,33,58,0.45);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;padding:20px;z-index:100;animation:dlgFade .14s ease-out}
+.app-dialog-backdrop[hidden]{display:none}
+@keyframes dlgFade{from{opacity:0}to{opacity:1}}
+.app-dialog{background:var(--panel);border:1px solid var(--line);border-radius:10px;max-width:460px;width:100%;box-shadow:0 18px 48px rgba(15,23,42,0.22);overflow:hidden;animation:dlgPop .16s ease-out}
+@keyframes dlgPop{from{transform:translateY(6px) scale(0.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.app-dialog-head{display:flex;align-items:center;gap:10px;padding:16px 20px 12px;border-bottom:1px solid var(--line-2)}
+.app-dialog-icon{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--teal-tint);color:var(--teal-ink)}
+.app-dialog.danger .app-dialog-icon{background:var(--bad-tint);color:var(--bad)}
+.app-dialog-title{font-size:16px;font-weight:600;color:var(--ink);margin:0}
+.app-dialog-body{padding:16px 20px;font-size:14px;color:var(--ink-2);line-height:1.55}
+.app-dialog-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 20px 16px;background:#FAFBFA;border-top:1px solid var(--line-2)}
+.btn-dlg{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:var(--radius);padding:8px 16px;font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-dlg:hover{background:var(--paper);border-color:var(--ink-2)}
+.btn-dlg.primary{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+.btn-dlg.primary:hover{background:var(--teal-ink);border-color:var(--teal-ink)}
+.btn-dlg.danger{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:600}
+.btn-dlg.danger:hover{background:#8E2B2B;border-color:#8E2B2B}
+
+@media (max-width:980px){
+  .workbench-main{grid-template-columns:1fr}
+  .block{grid-template-columns:1fr}
+  .block .en{border-inline-end:0;border-bottom:1px solid var(--line-2)}
+  .crit{grid-template-columns:1fr 1fr}
+  .steps-grid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){#go{transition:background .15s}}
+</style>
+</head>
+<body>
+<header>
+  <h1>GlocalInduct <span>تكييف المحتوى بالخبرة</span></h1>
+  <div class="nav-modes">
+    <button type="button" class="nav-btn active" id="btnNavWorkbench">🌍 Glocalization Workbench</button>
+    <button type="button" class="nav-btn" id="btnNavWorkflow">⚡ Pipeline &amp; Memory Workflows</button>
+  </div>
+  <div class="spacer"></div>
+  <label class="pill" for="modelSelect" style="gap:6px;padding:3px 10px" title="Switch active LLM between OpenAI gpt-4o and Ollama qwen3.8">
+    <span>model</span>
+    <select id="modelSelect" style="border:0;background:transparent;font-weight:600;color:var(--teal-ink);cursor:pointer;padding:1px 2px">
+      <option value="gpt-4o">openai / gpt-4o</option>
+      <option value="qwen3.8">ollama / qwen3.8</option>
+    </select>
+  </label>
+</header>
+
+<!-- ======================================================================= -->
+<!-- VIEW 1: GLOCALIZATION WORKBENCH                                         -->
+<!-- ======================================================================= -->
+<main id="viewWorkbench" class="workbench-main">
+  <section class="panel" aria-labelledby="src-h">
+    <h2 id="src-h">English source</h2>
+    <div class="body">
+      <textarea id="text" placeholder="Paste English text or Markdown here. Headings, lists, tables and code are kept as blocks."></textarea>
+      <div class="drop" id="drop">
+        <span id="dropLabel">Or drop a file here (.txt, .md, .docx, .pdf) — <span class="choose" id="choose">choose a file</span></span>
+        <button class="clear" id="clearFile" hidden title="Remove file">remove</button>
+        <input type="file" id="file" accept=".txt,.md,.markdown,.docx,.pdf">
+      </div>
+      <div class="run">
+        <button id="go">Glocalize<span class="ar">كيِّف النص</span></button>
+        <button type="button" id="btnClearWorkbench" title="Clear input text and Arabic output" style="border:1px solid var(--line);background:var(--panel);color:var(--ink-2);border-radius:var(--radius);padding:11px 14px;font-size:14px;font-weight:500;cursor:pointer">Clear</button>
+        <div class="release">
+          memory release <select id="release"></select>
+          <button type="button" id="btnDeleteRelease" title="Delete selected memory release" style="border:1px solid #E5C2C2;background:#FFF8F8;color:var(--bad);border-radius:var(--radius);padding:4px 8px;font-size:12.5px;cursor:pointer">🗑</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-live="polite">
+    <h2>Arabic output</h2>
+    <div id="result">
+      <div class="empty">Paste or upload an English text and click <b>Glocalize</b>.<br>
+      The model automatically discovers domain, genre, audience, communicative purpose, and cultural items, develops an adaptation plan, and generates culturally localized Arabic with full quality evaluation and memory provenance.</div>
+    </div>
+  </section>
+</main>
+
+<!-- ======================================================================= -->
+<!-- VIEW 2: PIPELINE & MEMORY WORKFLOWS                                     -->
+<!-- ======================================================================= -->
+<main id="viewWorkflow" class="workflow-main" style="display:none">
+  <!-- Hero Banner -->
+  <div class="wf-hero-banner">
+    <div class="wf-hero-text">
+      <h3>🚀 Experiential Adaptation Engine Controller (./run.sh)</h3>
+      <p>Manage offline experiential learning loops (ExpeL), dataset partitions, memory releases (M0 &amp; M1), and live benchmark evaluations directly from your browser.</p>
+    </div>
+    <div class="wf-hero-actions">
+      <button type="button" class="btn-hero" id="btnBuildFast">
+        <span>⚡</span> Run Fast Pipeline (5 Pairs Sample)
+      </button>
+      <button type="button" class="btn-secondary-white" id="btnBuildAll">
+        <span>🚀</span> Run Full Pipeline (All Pairs)
+      </button>
+      <button type="button" class="btn-secondary-white" id="btnRefreshOverview">
+        <span>↻</span> Refresh
+      </button>
+      <button type="button" class="btn-secondary-white" id="btnClearMemoryHero" style="background:rgba(178,58,58,0.35);border-color:rgba(255,220,220,0.45)" title="Remove stored M0/M1 releases, experiences, insights, runs, and traces (keeps ingested pairs)">
+        <span>🗑</span> Clear Stored Memory &amp; Traces
+      </button>
+    </div>
+  </div>
+
+  <!-- Live Sticky Notification Banner (Appears when workflow is executing) -->
+  <div id="liveBanner" class="live-banner" style="display:none">
+    <div class="live-dot pulse" id="liveDot"></div>
+    <div class="live-text">
+      <b id="liveActionTitle">Executing step...</b>
+      <span id="liveElapsed">Elapsed: 00:00 • Logs streaming below</span>
+    </div>
+    <div class="spacer"></div>
+    <button type="button" class="btn-live-scroll" id="btnLiveScroll">⬇ Jump to Step Inspector</button>
+    <button type="button" class="btn-live-cancel" id="btnLiveCancel">⏹ Cancel Process</button>
+  </div>
+
+  <!-- Step Runner: select the step, the number of pairs, then click Run -->
+  <div class="section-head">
+    <h2>Pipeline &amp; Memory Workflows (Steps 1 – 6)</h2>
+    <span class="sub">Select a step, the number of pairs, then click Run</span>
+  </div>
+
+  <div class="run-row" id="runRow">
+    <div class="run-field step-field">
+      <label for="runStepSelect">Step</label>
+      <select id="runStepSelect" title="Select the workflow step">
+        <option value="ingest_split">1 · Dataset Ingestion &amp; Partitioning</option>
+        <option value="build_seed">2 · Build Seed Memory (M0) — Agent A1</option>
+        <option value="online_loop">3→4→5 · Online Learning Loop, per sample (recommended)</option>
+        <option value="collect_practice">3 · Experiential Practice Loop — Agents A3, A4, A5</option>
+        <option value="update_insights">4 · Insight Consolidation (M1) — Agent A2</option>
+        <option value="inspect_memory">5 · Inspect Learned Memory Rules</option>
+        <option value="eval_dev">6 · Benchmark Evaluation — Dev split (Agent A5)</option>
+        <option value="eval_test">6 · Benchmark Evaluation — Test split (Agent A5)</option>
+      </select>
+    </div>
+    <div class="run-field" id="runPairsField">
+      <label for="runPairsSelect">Number of pairs / Sample</label>
+      <select id="runPairsSelect" title="Select how many pairs or a specific pair ID to process"></select>
+    </div>
+    <div class="run-field" id="runRelField" hidden>
+      <label for="inspectRelSelect">Release</label>
+      <select id="inspectRelSelect" title="Select release"></select>
+    </div>
+    <button type="button" class="btn-step" id="btnRunStep">▶ Run</button>
+    <span class="note run-note" id="runNote">993 pairs ready</span>
+  </div>
+
+  <!-- Step Inspector: per-step agent outputs, fed by /api/trace/* -->
+  <section class="inspector" id="inspector" aria-label="Step Inspector">
+    <div class="ins-head">
+      <h2>Step Inspector</h2>
+      <span class="sub">Outputs of every agent and step, live while a step runs</span>
+      <span class="spacer"></span>
+      <button type="button" class="ins-btn" id="insClear" style="color:var(--bad);border-color:#E5C2C2;background:#FFF8F8" title="Clear stored Step Inspector traces">🗑 Clear Traces</button>
+      <button type="button" class="ins-btn" id="insRefresh">↻ Refresh</button>
+    </div>
+    <div class="ins-tabs" id="insTabs" role="tablist"></div>
+    <div id="insBody"></div>
+  </section>
+
+</main>
+
+<!-- In-App Confirmation / Alert Dialog -->
+<div id="appDialogBackdrop" class="app-dialog-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="appDialogTitle" aria-describedby="appDialogBody">
+  <div id="appDialogCard" class="app-dialog">
+    <div class="app-dialog-head">
+      <span id="appDialogIcon" class="app-dialog-icon">🗑</span>
+      <h3 id="appDialogTitle" class="app-dialog-title">Confirm Action</h3>
+    </div>
+    <div id="appDialogBody" class="app-dialog-body"></div>
+    <div class="app-dialog-foot">
+      <button type="button" id="appDialogCancel" class="btn-dlg">Cancel</button>
+      <button type="button" id="appDialogConfirm" class="btn-dlg primary">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/inspector.js?v=ins14"></script>
+<script>
+const $ = s => document.querySelector(s);
+let status = null, fileObj = null;
+
+function showDialog({ title = 'Notice', message = '', confirmText = 'OK', cancelText = null, danger = false, icon = null }) {
+  return new Promise(resolve => {
+    const backdrop = $('#appDialogBackdrop');
+    const card = $('#appDialogCard');
+    const iconEl = $('#appDialogIcon');
+    const titleEl = $('#appDialogTitle');
+    const bodyEl = $('#appDialogBody');
+    const cancelBtn = $('#appDialogCancel');
+    const confirmBtn = $('#appDialogConfirm');
+
+    card.classList.toggle('danger', !!danger);
+    iconEl.textContent = icon || (danger ? '🗑' : 'ℹ️');
+    titleEl.textContent = title;
+    bodyEl.textContent = message;
+    confirmBtn.textContent = confirmText;
+    confirmBtn.className = 'btn-dlg ' + (danger ? 'danger' : 'primary');
+
+    if (cancelText) {
+      cancelBtn.hidden = false;
+      cancelBtn.textContent = cancelText;
+    } else {
+      cancelBtn.hidden = true;
+    }
+
+    const close = (result) => {
+      backdrop.hidden = true;
+      window.removeEventListener('keydown', onKey);
+      resolve(result);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); close(false); }
+    };
+
+    cancelBtn.onclick = () => close(false);
+    confirmBtn.onclick = () => close(true);
+    backdrop.onclick = (e) => { if (e.target === backdrop) close(false); };
+    window.addEventListener('keydown', onKey);
+
+    backdrop.hidden = false;
+    confirmBtn.focus();
+  });
+}
+
+// ============================================================================
+// Navigation Tabs
+// ============================================================================
+$('#btnNavWorkbench').onclick = () => switchView('workbench');
+$('#btnNavWorkflow').onclick = () => { switchView('workflow'); loadWorkflowOverview(); if (window.inspInit) window.inspInit(); };
+
+function switchView(mode) {
+  if (mode === 'workbench') {
+    $('#btnNavWorkbench').classList.add('active');
+    $('#btnNavWorkflow').classList.remove('active');
+    $('#viewWorkbench').style.display = 'grid';
+    $('#viewWorkflow').style.display = 'none';
+  } else {
+    $('#btnNavWorkflow').classList.add('active');
+    $('#btnNavWorkbench').classList.remove('active');
+    $('#viewWorkbench').style.display = 'none';
+    $('#viewWorkflow').style.display = 'flex';
+  }
+}
+
+// ============================================================================
+// Status & Initialization
+// ============================================================================
+async function loadStatus(){
+  const r = await fetch('/api/status'); status = await r.json();
+  const p = $('#provider');
+  if (p) {
+    if (status.demo_mode){ p.className='pill demo'; p.innerHTML='demo mode: fake provider (placeholder Arabic, no quality claims)'; }
+    else { p.className='pill'; p.innerHTML = `provider <b>${status.provider.provider}</b> <b>${status.provider.model}</b>`; }
+  }
+  const ms = $('#modelSelect');
+  if (ms && status.provider && status.provider.model) {
+    const cur = status.provider.model.startsWith('qwen3.8') ? 'qwen3.8' : status.provider.model;
+    if (![...ms.options].some(o => o.value === cur)) {
+      const opt = document.createElement('option');
+      opt.value = cur;
+      opt.textContent = `${status.provider.provider} / ${status.provider.model}`;
+      ms.appendChild(opt);
+    }
+    ms.value = cur;
+  }
+  const sel = $('#release'); sel.innerHTML='';
+  for (const rid of status.releases){ const o=document.createElement('option'); o.value=rid; o.textContent=rid + (rid===status.active_release?' (active)':''); if(rid===status.active_release) o.selected=true; sel.appendChild(o); }
+}
+$('#modelSelect').onchange = async (e) => {
+  const model = e.target.value;
+  const r = await fetch('/api/model', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model})});
+  if (r.ok) { await loadStatus(); }
+  else { const err = await r.json().catch(()=>({})); await showDialog({ title: 'Model Switch Failed', message: err.detail || 'Failed to switch model', danger: true, icon: '⚠️' }); await loadStatus(); }
+};
+loadStatus();
+
+// ============================================================================
+// Workflow Overview & Execution
+// ============================================================================
+let pollInterval = null;
+let lastLogLine = 0;
+let currentBtn = null;
+
+async function loadWorkflowOverview() {
+  try {
+    const r = await fetch('/api/workflow/overview');
+    const data = await r.json();
+    // Update inspection select
+    const sel = $('#inspectRelSelect');
+    sel.innerHTML = '';
+    for (const rel of data.releases) {
+      const opt = document.createElement('option');
+      opt.value = rel.release_id;
+      opt.textContent = rel.release_id + (rel.is_active ? ' (active)' : '');
+      if (rel.release_id === data.active_release) opt.selected = true;
+      sel.appendChild(opt);
+    }
+
+    if (data.pairs_total) {
+      RUN_STEPS.ingest_split.note = `${data.pairs_total} pairs ready`;
+    }
+    if (data.splits && Object.keys(data.splits).length) {
+      if (data.splits.seed) RUN_STEPS.build_seed.all = data.splits.seed;
+      if (data.splits.practice) {
+        RUN_STEPS.collect_practice.all = data.splits.practice;
+        RUN_STEPS.online_loop.all = data.splits.practice;
+        RUN_STEPS.update_insights.all = data.splits.practice;
+      }
+      if (data.splits.development) RUN_STEPS.eval_dev.all = data.splits.development;
+      if (data.splits.test) RUN_STEPS.eval_test.all = data.splits.test;
+    }
+    if (data.pairs_by_split) {
+      RUN_STEPS.build_seed.pairList = data.pairs_by_split.seed || [];
+      RUN_STEPS.collect_practice.pairList = data.pairs_by_split.practice || [];
+      RUN_STEPS.online_loop.pairList = data.pairs_by_split.practice || [];
+      RUN_STEPS.update_insights.pairList = data.pairs_by_split.practice || [];
+      RUN_STEPS.eval_dev.pairList = data.pairs_by_split.development || [];
+      RUN_STEPS.eval_test.pairList = data.pairs_by_split.test || [];
+      RUN_STEPS._allPairs = data.pairs_by_split.all || [];
+    }
+    syncRunRow();
+
+    // Check if task is running
+    if (data.running) {
+      startPolling();
+    }
+  } catch(e) {
+    console.warn('Failed to load workflow overview:', e);
+  }
+}
+
+async function triggerAction(action, extra = {}, btn = null) {
+  // Visual button feedback
+  if (btn) {
+    currentBtn = btn;
+    btn.dataset.origText = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span> Starting...';
+    btn.disabled = true;
+  }
+
+  // Show live banner immediately
+  const banner = $('#liveBanner');
+  banner.style.display = 'flex';
+  banner.className = 'live-banner';
+  $('#liveDot').className = 'live-dot pulse';
+  $('#liveActionTitle').textContent = `Starting ${action.replace('_', ' ')}...`;
+  $('#liveElapsed').textContent = 'Submitting request to container...';
+
+  // Smooth scroll to the Step Inspector
+  $('#inspector').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  try {
+    const body = { action, ...extra };
+    const r = await fetch('/api/workflow/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (d.error) {
+      banner.className = 'live-banner error';
+      $('#liveActionTitle').textContent = 'Could not start workflow';
+      $('#liveElapsed').textContent = d.error.message || d.error;
+      resetBtn();
+      return;
+    }
+    lastLogLine = 0;
+    $('#liveActionTitle').textContent = `Running: ${d.title}`;
+    startPolling();
+  } catch(e) {
+    banner.className = 'live-banner error';
+    $('#liveActionTitle').textContent = 'Failed to connect to server';
+    $('#liveElapsed').textContent = String(e);
+    resetBtn();
+  }
+}
+
+function resetBtn() {
+  if (currentBtn) {
+    currentBtn.innerHTML = currentBtn.dataset.origText || currentBtn.innerHTML;
+    currentBtn.disabled = false;
+    currentBtn = null;
+  }
+}
+
+function startPolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(updateWorkflowStatus, 1200);
+  updateWorkflowStatus();
+}
+
+async function updateWorkflowStatus() {
+  try {
+    const r = await fetch(`/api/workflow/status?from_line=${lastLogLine}`);
+    const st = await r.json();
+    if (window.inspOnStatus) window.inspOnStatus(st);
+    if (st.logs && st.logs.length) lastLogLine = st.total_lines;
+    if (st.running) {
+      $('#liveBanner').style.display = 'flex';
+      $('#liveBanner').className = 'live-banner';
+      $('#liveDot').className = 'live-dot pulse';
+      $('#liveActionTitle').textContent = `Running: ${st.title}`;
+      $('#liveElapsed').textContent = `Elapsed: ${st.elapsed_seconds}s • Streaming progress in the Step Inspector below`;
+    } else {
+      clearInterval(pollInterval);
+      pollInterval = null;
+      const code = st.exit_code;
+      const isSuccess = code === 0;
+
+      // Update Live Banner
+      if (st.title) {
+        $('#liveBanner').style.display = 'flex';
+        $('#liveBanner').className = isSuccess ? 'live-banner completed' : (code === -1 ? 'live-banner' : 'live-banner error');
+        $('#liveDot').className = 'live-dot';
+        $('#liveActionTitle').textContent = isSuccess ? `✔ Completed: ${st.title}` : (code === -1 ? `⚠ Cancelled: ${st.title}` : `✖ Failed: ${st.title}`);
+        $('#liveElapsed').textContent = `Finished in ${st.elapsed_seconds}s (exit code ${code})`;
+      }
+
+      resetBtn();
+      loadWorkflowOverview();
+      loadStatus();
+    }
+  } catch(e) {
+    console.warn('Status poll failed:', e);
+  }
+}
+
+// Cancel
+$('#btnLiveCancel').onclick = async () => {
+  await fetch('/api/workflow/cancel', { method: 'POST' });
+};
+
+// Jump to the Step Inspector
+$('#btnLiveScroll').onclick = () => {
+  $('#inspector').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Step Button Handlers
+$('#btnBuildFast').onclick = e => triggerAction('build_all_memory', { limit: 5 }, e.currentTarget);
+$('#btnBuildAll').onclick = e => triggerAction('build_all_memory', {}, e.currentTarget);
+$('#btnRefreshOverview').onclick = () => loadWorkflowOverview();
+
+const EMPTY_WORKBENCH_HTML = `<div class="empty">Paste or upload an English text and click <b>Glocalize</b>.<br>
+The model automatically discovers domain, genre, audience, communicative purpose, and cultural items, develops an adaptation plan, and generates culturally localized Arabic with full quality evaluation and memory provenance.</div>`;
+
+async function clearWorkspaceData(scope, extra = {}) {
+  const titles = {
+    traces: 'Clear Step Inspector Traces',
+    memory: 'Clear Memory & Traces',
+    all: 'Reset All Workspace Data',
+    release: `Delete Memory Release ${extra.release_id || ''}`
+  };
+  const labels = {
+    traces: 'all Step Inspector trace sessions',
+    memory: 'learned memory releases (M0/M1), experiences, insights, run checkpoints, and traces (ingested dataset pairs will be kept)',
+    all: 'ALL stored workspace data, including M0/M1 memories, traces, runs, and ingested dataset partitions',
+    release: `memory release "${extra.release_id || ''}"`
+  };
+  const ok = await showDialog({
+    title: titles[scope] || 'Remove Stored Data',
+    message: `Are you sure you want to remove ${labels[scope] || scope}?`,
+    confirmText: 'Remove',
+    cancelText: 'Cancel',
+    danger: true,
+    icon: '🗑'
+  });
+  if (!ok) return;
+  try {
+    const r = await fetch('/api/workspace/clear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scope, ...extra })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      await showDialog({ title: 'Could Not Remove Data', message: d.detail || 'Failed to remove stored data', danger: true, icon: '⚠️' });
+      return;
+    }
+    if (scope !== 'release' && window.inspClear) window.inspClear();
+    $('#liveBanner').style.display = 'none';
+    if (scope === 'all') {
+      RUN_STEPS.ingest_split.note = '0 pairs (run Step 1 to ingest)';
+      RUN_STEPS.build_seed.all = 0;
+      RUN_STEPS.collect_practice.all = 0;
+      RUN_STEPS.update_insights.all = 0;
+      RUN_STEPS.eval_dev.all = 0;
+      RUN_STEPS.eval_test.all = 0;
+      RUN_STEPS._allPairs = [];
+    }
+    await loadStatus();
+    await loadWorkflowOverview();
+    if (window.inspInit) await window.inspInit();
+  } catch (e) {
+    await showDialog({ title: 'Connection Error', message: 'Failed to connect to server: ' + e, danger: true, icon: '⚠️' });
+  }
+}
+
+$('#btnClearMemoryHero').onclick = () => clearWorkspaceData('memory');
+$('#insClear').onclick = () => clearWorkspaceData('traces');
+$('#btnDeleteRelease').onclick = async () => {
+  const rel = $('#release').value;
+  if (!rel || rel === 'M-EMPTY') {
+    await showDialog({
+      title: 'Protected Baseline',
+      message: 'M-EMPTY is the empty baseline placeholder and cannot be deleted.',
+      confirmText: 'OK',
+      icon: 'ℹ️'
+    });
+    return;
+  }
+  clearWorkspaceData('release', { release_id: rel });
+};
+$('#btnClearWorkbench').onclick = () => {
+  $('#text').value = '';
+  fileInput.value = '';
+  setFile(null);
+  $('#result').innerHTML = EMPTY_WORKBENCH_HTML;
+};
+
+// Single-row step runner: which controls each step needs, and how many pairs "All" means.
+const RUN_STEPS = {
+  ingest_split:     { pairs: false, rel: false, note: '6 pairs ready' },
+  build_seed:       { pairs: true,  rel: false, all: 1, pairList: [], note: 'Builds baseline memory M0' },
+  online_loop:      { pairs: true,  rel: false, all: 5, pairList: [], note: 'Each sample: practice → insights → inspect; next sample uses the learned memory (rolling M1, resumable)' },
+  collect_practice: { pairs: true,  rel: false, all: 5, pairList: [], note: 'Practice pairs run against M0' },
+  update_insights:  { pairs: true,  rel: false, all: 5, pairList: [], note: 'M0 → M1' },
+  inspect_memory:   { pairs: false, rel: true,  note: 'Audit a learned memory release' },
+  eval_dev:         { pairs: true,  rel: true,  all: 0, pairList: [], note: 'Development split' },
+  eval_test:        { pairs: true,  rel: true,  all: 0, pairList: [], note: 'Test split' },
+  _allPairs: [],
+};
+const PAIR_CHOICES = [1, 2, 3, 5, 10, 25, 50, 100];
+
+function syncRunRow() {
+  const cfg = RUN_STEPS[$('#runStepSelect').value];
+  const pairs = $('#runPairsSelect');
+  $('#runPairsField').hidden = !cfg.pairs;
+  $('#runRelField').hidden = !cfg.rel;
+  $('#runNote').textContent = cfg.note;
+  if (!cfg.pairs) return;
+  const prev = pairs.value;
+  pairs.innerHTML = '';
+
+  const batchGroup = document.createElement('optgroup');
+  batchGroup.label = 'Batch Size';
+  for (const n of PAIR_CHOICES.filter(n => n < cfg.all)) {
+    batchGroup.appendChild(new Option(`${n} pair${n === 1 ? '' : 's'} (sample)`, String(n)));
+  }
+  batchGroup.appendChild(new Option(`All (${cfg.all} pair${cfg.all === 1 ? '' : 's'})`, 'all'));
+  pairs.appendChild(batchGroup);
+
+  const stepPairs = (cfg.pairList && cfg.pairList.length) ? cfg.pairList : (RUN_STEPS._allPairs || []);
+  if (stepPairs.length) {
+    const exactGroup = document.createElement('optgroup');
+    exactGroup.label = 'Exact Sample (Pair ID)';
+    for (const pid of stepPairs) {
+      exactGroup.appendChild(new Option(`Pair ${pid}`, `pair:${pid}`));
+    }
+    pairs.appendChild(exactGroup);
+  }
+
+  const allValues = [...pairs.querySelectorAll('option')].map(o => o.value);
+  pairs.value = allValues.includes(prev) ? prev : (allValues.includes('5') ? '5' : 'all');
+}
+$('#runStepSelect').onchange = syncRunRow;
+syncRunRow();
+
+$('#btnRunStep').onclick = e => {
+  const action = $('#runStepSelect').value, cfg = RUN_STEPS[action];
+  const extra = {};
+  if (cfg.pairs) {
+    const val = $('#runPairsSelect').value;
+    if (val && val.startsWith('pair:')) {
+      extra.pair_id = val.slice(5);
+    } else if (val !== 'all') {
+      extra.limit = parseInt(val, 10);
+    }
+  }
+  const rel = $('#inspectRelSelect').value;
+  if (action === 'online_loop') { extra.base = 'M0'; extra.release = 'M1'; }
+  else if (action === 'build_seed' || action === 'collect_practice') extra.release = 'M0';
+  else if (action === 'update_insights') { extra.base = 'M0'; extra.release = 'M1'; }
+  else if (action === 'inspect_memory') extra.release = rel || 'M0';
+  else if (action === 'eval_dev') extra.release = rel || 'M0';
+  else if (action === 'eval_test') extra.release = rel || 'M1';
+  triggerAction(action, extra, e.currentTarget);
+};
+
+// ============================================================================
+// File Handling (Workbench)
+// ============================================================================
+const drop=$('#drop'), fileInput=$('#file');
+$('#choose').onclick=()=>fileInput.click();
+fileInput.onchange=()=>setFile(fileInput.files[0]);
+for (const ev of ['dragenter','dragover']) drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')});
+for (const ev of ['dragleave','drop']) drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')});
+drop.addEventListener('drop',e=>setFile(e.dataTransfer.files[0]));
+function setFile(f){ fileObj=f||null; $('#dropLabel').textContent = f ? `File: ${f.name} (${Math.round(f.size/1024)} KB)` : 'Or drop a file here (.txt, .md, .docx, .pdf)'; $('#clearFile').hidden=!f; if(f) $('#text').value=''; }
+$('#clearFile').onclick=()=>{fileInput.value='';setFile(null);};
+
+function context(){
+  // All parameters are discovered by the model (Agent A3)
+  return { locale_scope: 'general_arab' };
+}
+
+$('#go').onclick = async () => {
+  const btn=$('#go'); btn.disabled=true; btn.firstChild.textContent='Glocalizing';
+  const fd=new FormData();
+  if (fileObj) fd.append('file', fileObj); else fd.append('text', $('#text').value);
+  fd.append('context', JSON.stringify(context())); fd.append('release', $('#release').value);
+  try{
+    const r=await fetch('/api/glocalize',{method:'POST',body:fd}); const d=await r.json();
+    if (d.error && !d.result) render({result:{status:'unresolved',issue_codes:[d.error.code],fallback_reasons:[]},error:d.error,blocks:[],items:[]});
+    else render(d);
+  }catch(e){ $('#result').innerHTML=`<div class="err">Could not reach the server: ${esc(String(e))}</div>`; }
+  btn.disabled=false; btn.firstChild.textContent='Glocalize';
+};
+
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const WHY = {accepted:'The reference comparison found the translation compatible and every cultural decision had support.',
+             conservative:'The reference comparison passed; at least one uncertain cultural item was kept rather than replaced.',
+             unresolved:'No Arabic is released. The reference comparison did not pass or the request could not be completed.'};
+
+function highlight(text, marks){
+  let out = esc(text);
+  for (const m of marks){ if(!m.quote) continue; const q=esc(m.quote); const i=out.indexOf(q); if(i<0) continue;
+    out = out.slice(0,i)+`<mark class="${m.cls}" title="${esc(m.title||'')}">${q}</mark>`+out.slice(i+q.length); }
+  return out;
+}
+
+function render(d){
+  const r=d.result, st=r.status;
+  let why = (st!=='unresolved' && !d.evaluation) ? 'Released directly following the adaptation plan (Quality evaluation skipped during inference).' : WHY[st];
+  let list = [];
+  if (st==='conservative') list = r.fallback_reasons;
+  if (st==='unresolved') list = [...r.issue_codes.map(c=>'issue: '+c), ...(d.error?[d.error.message]:[])];
+  const usage = d.usage ? `${d.usage.model_calls} model calls<br>${d.usage.input_tokens} in / ${d.usage.output_tokens} out tokens<br>${d.usage.elapsed_seconds}s` : '';
+  let html = `<div class="status"><div><div class="word ${st}">${st}</div><div class="why">${why}${list.length?'<ul>'+list.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':''}</div></div><div class="usage">${usage}${d.windows>1?`<br>${d.windows} windows`:''}</div></div>`;
+  if (d.extraction_warnings && d.extraction_warnings.length) html += `<div class="note" style="padding:6px 16px">${esc(d.extraction_warnings.join('; '))}</div>`;
+  const items = d.items||[];
+  if (items.length) html += `<div class="legend"><mark class="substitute">substituted</mark><mark class="retain">retained</mark> hover a mark for the decision</div>`;
+  html += '<div class="blocks">';
+  for (const b of d.blocks||[]){
+    const its = items.filter(i=>i.block_id===b.block_id);
+    const enMarks = its.map(i=>({quote:i.quote, cls:i.strategy||'retain', title:`${i.item_id} ${i.category}: ${i.essentiality}; ${i.strategy||'no decision'}`}));
+    const arMarks = its.map(i=>({quote:i.strategy==='substitute'?i.counterpart_ar:i.quote, cls:i.strategy||'retain', title:i.strategy==='substitute'?`replaces "${i.quote}" with support from ${i.support.map(s=>s.experience_id).join(', ')}`:(i.fallback_reason||i.rationale||'retained')}));
+    const ar = b.arabic==null ? `<div class="ar missing">not released</div>` : `<div class="ar">${highlight(b.arabic, arMarks)}</div>`;
+    html += `<div class="block ${b.kind}"><div class="en">${highlight(b.source, enMarks)}</div>${ar}</div>`;
+  }
+  html += '</div>';
+  // tabs
+  const m = d.memory || {};
+  const expCnt = (m.experiences || []).length;
+  const insCnt = (m.insights || []).length;
+  const tabDefs = [
+    { title: 'Plan & Decisions', idx: 0 },
+    { title: `📚 Memory (${expCnt} ex · ${insCnt} ins)`, idx: 2 },
+    { title: 'Evaluation', idx: 1 },
+    { title: 'Raw', idx: 3 }
+  ];
+  html += `<div class="tabs" role="tablist">${tabDefs.map((t,i)=>`<button role="tab" aria-selected="${t.idx===0}" data-tab="${t.idx}">${t.title}</button>`).join('')}</div>`;
+  html += `<div class="tab active" data-pane="0">${planPane(d)}</div><div class="tab" data-pane="1">${evalPane(d)}</div><div class="tab" data-pane="2">${memPane(d)}</div><div class="tab" data-pane="3"><pre>${esc(JSON.stringify(d,null,1))}</pre></div>`;
+  $('#result').innerHTML = html;
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.tab').forEach(p=>p.classList.toggle('active',p.dataset.pane===b.dataset.tab));});
+}
+
+function planPane(d){
+  if (!d.profile) return '<p class="note">No profile was produced for this request.</p>';
+  const domainsStr = d.profile.domains.map(x => esc(x.domain) + (x.basis==='inferred' ? ' <i>(inferred)</i>' : '')).join(', ');
+  let h = `
+  <div class="disc-card">
+    <div class="disc-title">
+      <span>✨ <b>Model-Discovered Parameters & Context</b></span>
+      <span class="disc-tag">${d.profile.purpose_basis==='inferred' ? 'Auto-Discovered by Model' : 'Supplied Context'}</span>
+    </div>
+    <div class="disc-grid">
+      <div><b>Domain(s):</b> ${domainsStr || 'universal'}</div>
+      <div><b>Genre:</b> ${esc(d.profile.genre || 'unspecified')}</div>
+      <div><b>Audience:</b> ${esc(d.profile.audience || 'unspecified')}</div>
+      <div><b>Cultural Items:</b> ${d.items.length} detected</div>
+    </div>
+    <div class="disc-purpose"><b>Communicative Purpose:</b> ${esc(d.profile.purpose)}</div>
+  </div>`;
+  if (!d.items.length) h += '<p class="note">No cultural items were detected. All preservation requirements still apply and the text was translated naturally.</p>';
+  else h += `<table><tr><th>Item</th><th>Function</th><th>Essentiality</th><th>Decision</th><th>Support</th></tr>` + d.items.map(i=>`<tr><td><b>${esc(i.quote)}</b><br><span class="note">${esc(i.category)}</span></td><td>${esc(i.function)}<br><span class="note">${esc(i.factual_role)}</span></td><td><span class="chip ${i.essentiality}">${i.essentiality}</span></td><td>${i.strategy?`<span class="chip ${i.strategy}">${i.strategy}</span>`:''} ${i.counterpart_ar?`<span class="ar">${esc(i.counterpart_ar)}</span> <span class="note">(${i.term_policy})</span>`:''}<br><span class="note">${esc(i.fallback_reason||i.rationale||'')}</span></td><td>${i.support.map(s=>`<span class="ar">${esc(s.quote)}</span><br><span class="note">${esc(s.experience_id)}: ${esc(s.function)}</span>`).join('<br>')}${i.insights.length?`<br><span class="note">insights: ${i.insights.map(x=>esc(x.insight_id)+' v'+x.version).join(', ')}</span>`:''}</td></tr>`).join('') + '</table>';
+  if (d.plan && d.plan.terminology.length) h += `<h3 style="font-size:14px;margin:16px 0 6px">Terminology</h3><table><tr><th>Source concept</th><th>Preferred Arabic</th><th>Policy</th></tr>${d.plan.terminology.map(t=>`<tr><td>${esc(t.source_concept)}</td><td><span class="ar">${esc(t.preferred_ar)}</span></td><td>${t.policy}</td></tr>`).join('')}</table>`;
+  if (d.profile.requirements.length) h += `<details style="margin-top:14px"><summary class="note">${d.profile.requirements.length} preservation requirements</summary><table>${d.profile.requirements.map(r=>`<tr><td>${esc(r.requirement_id)}</td><td>${esc(r.kind)}${r.protected?' (protected)':''}</td><td>${esc(r.description)}</td></tr>`).join('')}</table></details>`;
+  if (d.profile.uncertainties.length) h += `<p class="note">Uncertainties: ${d.profile.uncertainties.map(esc).join('; ')}</p>`;
+
+  // Direct display of retrieved insights & examples right in the plan view
+  const m = d.memory;
+  if (m && (m.insights.length || m.experiences.length)) {
+    h += `<div style="margin-top:20px;border-top:1px solid var(--line);padding-top:14px">`;
+    h += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">`;
+    h += `<h3 style="font-size:14px;font-weight:700;margin:0">📚 Retrieved Memory Guidance (${m.experiences.length} Examples, ${m.insights.length} Insights)</h3>`;
+    h += `<span class="note">Release <b>${esc(m.release.release_id)}</b></span></div>`;
+
+    if (m.insights.length) {
+      h += `<h4 style="font-size:13px;font-weight:600;margin:10px 0 6px;color:#8B4513">💡 Retrieved Active Insights (${m.insights.length})</h4>`;
+      h += `<div style="display:flex;flex-direction:column;gap:6px">` + m.insights.map(i => `
+        <div style="background:#FCF9F7;border-left:3px solid #C07D3E;border:1px solid #EAD8C7;border-left-width:3px;padding:8px 12px;border-radius:4px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-2);margin-bottom:3px">
+            <b>${esc(i.insight_id)} v${i.version}</b>
+            <span class="chip" style="font-size:11px">importance ${i.importance}</span>
+          </div>
+          <div style="color:#222;line-height:1.4">${esc(i.lesson)}</div>
+          ${i.applies_when && i.applies_when.length ? `<div class="note" style="margin-top:4px;font-size:11.5px"><b>Applies when:</b> ${i.applies_when.map(esc).join('; ')}</div>` : ''}
+        </div>
+      `).join('') + `</div>`;
+    }
+
+    if (m.experiences.length) {
+      h += `<h4 style="font-size:13px;font-weight:600;margin:14px 0 6px;color:#1B4332">📖 Retrieved Past Demonstrations (${m.experiences.length})</h4>`;
+      h += `<div style="display:flex;flex-direction:column;gap:6px">` + m.experiences.map(e => `
+        <div style="background:#F6FBF8;border-left:3px solid #2D6A4F;border:1px solid #D1E7DD;border-left-width:3px;padding:8px 12px;border-radius:4px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-2);margin-bottom:3px">
+            <b>${esc(e.experience_id)}</b>
+            <span style="font-size:11.5px">similarity <b>${e.similarity}</b>${e.domains && e.domains.length ? ` · ${e.domains.join(', ')}` : ''}</span>
+          </div>
+          <div style="color:#333;margin-bottom:3px">${esc(e.source_excerpt)}</div>
+          <div class="ar" style="font-family:var(--font-ar);direction:rtl;text-align:right;color:#0F5132;font-size:14px;font-weight:500">${esc(e.arabic_excerpt)}</div>
+        </div>
+      `).join('') + `</div>`;
+    }
+    h += `</div>`;
+  }
+
+  return h;
+}
+
+function evalPane(d){
+  if (!d.evaluation) return '<p class="note">Quality evaluation is disabled during online inference / glocalization; translation is released directly following the frozen adaptation plan.</p>';
+  const rc = d.evaluation.reference_comparison;
+  if (rc && !d.evaluation.criteria.length) {
+    const kind = rc.result==='compatible' ? 'pass' : (rc.result==='incompatible' ? 'fail' : 'unknown');
+    let h = `<div class="crit"><div class="c ${kind}"><div class="name">Reference comparison</div><span class="chip ${kind}">${esc(rc.result)}</span><p>${esc(rc.explanation||'')}</p></div></div>`;
+    const ds = rc.differences||[];
+    if (ds.length) h += '<div class="findings">' + ds.map(x=>`<div class="finding ${x.critical?'critical':'substantive'}"><b>${esc(x.classification)}</b>${x.critical?' (critical)':''} ${esc(x.explanation)}${x.correction_goal?`<br><span class="note">correction goal: ${esc(x.correction_goal)}</span>`:''}</div>`).join('') + '</div>';
+    return h;
+  }
+  const crits = d.evaluation.criteria.filter(c => names[c.criterion]);
+  let h = '<div class="crit">' + crits.map(c=>`<div class="c ${c.status}"><div class="name">${names[c.criterion]}</div><div class="score">${c.score==null?'–':c.score}<small> / 4</small></div><div class="meter"><i style="width:${c.score==null?0:c.score*25}%"></i></div><span class="chip ${c.status}">${c.status.replace('_',' ')}</span><p>${esc(c.explanation)}</p></div>`).join('') + '</div>';
+  const fs = crits.flatMap(c=>c.findings.map(f=>({...f,criterion:names[c.criterion]})));
+  if (fs.length) h += '<div class="findings">' + fs.map(f=>`<div class="finding ${f.severity}"><b>${esc(f.issue_code)}</b> (${f.severity}, ${f.criterion}) ${esc(f.explanation)}${f.correction_goal?`<br><span class="note">correction goal: ${esc(f.correction_goal)}</span>`:''}</div>`).join('') + '</div>';
+  else h += '<p class="note" style="margin-top:12px">No findings. Pass requires a score of at least 3 on every criterion and no critical finding; there is no weighted average.</p>';
+  return h;
+}
+
+function memPane(d){
+  const m=d.memory; if(!m) return '';
+  let h = `<div class="mem"><p class="note">Release <b>${esc(m.release.release_id)}</b> (${m.release.demonstrations} demonstrations, ${m.release.insights} active insights)${m.excluded_groups && m.excluded_groups.length?`; excluded groups: ${m.excluded_groups.map(esc).join(', ')}`:''}</p>`;
+  h += `<h3>Examples retrieved (${m.experiences.length})</h3>`;
+  h += m.experiences.length ? m.experiences.map(e=>`<div class="card"><div class="meta">${esc(e.experience_id)} — ${e.kind.replace('_',' ')} — similarity ${e.similarity}${e.domains && e.domains.length ? ` — ${e.domains.map(esc).join(', ')}` : ''} — scope ${esc(e.scope.level||'')}${e.scope.culture_specific?' (culture-specific)':''}</div>${esc(e.source_excerpt)}<span class="ar">${esc(e.arabic_excerpt)}</span></div>`).join('') : '<p class="note">None. Empty retrieval is valid: eligible incidental items are retained safely.</p>';
+  h += `<h3>Insights retrieved (${m.insights.length})</h3>`;
+  h += m.insights.length ? m.insights.map(i=>`<div class="card"><div class="meta">${esc(i.insight_id)} v${i.version} — importance ${i.importance} — ${esc(i.scope.level)}</div>${esc(i.lesson)}<div class="note">applies when: ${i.applies_when.map(esc).join('; ')}</div></div>`).join('') : '<p class="note">None.</p>';
+  if (m.filter_decisions.length) h += `<details><summary class="note">${m.filter_decisions.length} gate decisions</summary><table>${m.filter_decisions.map(f=>`<tr><td>${esc(f.experience_id||f.insight_id||f.origin||'')}</td><td>${esc(f.decision||'exclude')}</td><td>${esc(f.reason)}</td></tr>`).join('')}</table></details>`;
+  return h + '</div>';
+}
+</script>
+</body>
+</html>

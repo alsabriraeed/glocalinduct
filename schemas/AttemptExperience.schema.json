@@ -1,0 +1,325 @@
+{
+  "$defs": {
+    "Feedback": {
+      "additionalProperties": false,
+      "properties": {
+        "scope": {
+          "enum": [
+            "source_only",
+            "reference_informed"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "prior_attempt_id": {
+          "minLength": 1,
+          "title": "Prior Attempt Id",
+          "type": "string"
+        },
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "reflection": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reflection"
+        }
+      },
+      "required": [
+        "scope",
+        "prior_attempt_id",
+        "findings"
+      ],
+      "title": "Feedback",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "issue_code": {
+          "minLength": 1,
+          "title": "Issue Code",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "minor",
+            "substantive",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "affected_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Affected Ids",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "correction_goal": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Goal"
+        }
+      },
+      "required": [
+        "issue_code",
+        "severity",
+        "affected_ids",
+        "evidence",
+        "explanation",
+        "correction_goal"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "QuoteRef": {
+      "additionalProperties": false,
+      "properties": {
+        "text_key": {
+          "minLength": 1,
+          "title": "Text Key",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Block Id"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text_key",
+        "block_id",
+        "quote",
+        "occurrence"
+      ],
+      "title": "QuoteRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "const": "agent_attempt",
+      "title": "Kind",
+      "type": "string"
+    },
+    "task_id": {
+      "minLength": 1,
+      "title": "Task Id",
+      "type": "string"
+    },
+    "group_id": {
+      "minLength": 1,
+      "title": "Group Id",
+      "type": "string"
+    },
+    "phase": {
+      "enum": [
+        "practice",
+        "deployment",
+        "development",
+        "test"
+      ],
+      "title": "Phase",
+      "type": "string"
+    },
+    "attempt_number": {
+      "minimum": 1,
+      "title": "Attempt Number",
+      "type": "integer"
+    },
+    "previous_attempt_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Previous Attempt Id"
+    },
+    "source_profile_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Source Profile Id"
+    },
+    "release_id": {
+      "minLength": 1,
+      "title": "Release Id",
+      "type": "string"
+    },
+    "retrieval_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Retrieval Id"
+    },
+    "plan_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Plan Id"
+    },
+    "candidate_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Candidate Id"
+    },
+    "quality_report_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Quality Report Id"
+    },
+    "comparison_report_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Comparison Report Id"
+    },
+    "feedback_received": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Feedback"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "success",
+        "failure",
+        "error"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "eligible": {
+      "title": "Eligible",
+      "type": "boolean"
+    },
+    "issue_codes": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Issue Codes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "kind",
+    "task_id",
+    "group_id",
+    "phase",
+    "attempt_number",
+    "previous_attempt_id",
+    "source_profile_id",
+    "release_id",
+    "retrieval_id",
+    "plan_id",
+    "candidate_id",
+    "quality_report_id",
+    "comparison_report_id",
+    "feedback_received",
+    "outcome",
+    "eligible",
+    "issue_codes"
+  ],
+  "title": "AttemptExperience",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,312 @@
+{
+  "$defs": {
+    "Criterion": {
+      "additionalProperties": false,
+      "properties": {
+        "criterion": {
+          "enum": [
+            "meaning_and_purpose",
+            "cultural_fit",
+            "arabic_quality"
+          ],
+          "title": "Criterion",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "unknown",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 4,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "criterion",
+        "status",
+        "score",
+        "evidence",
+        "findings",
+        "explanation"
+      ],
+      "title": "Criterion",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "issue_code": {
+          "minLength": 1,
+          "title": "Issue Code",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "minor",
+            "substantive",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "affected_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Affected Ids",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "correction_goal": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Goal"
+        }
+      },
+      "required": [
+        "issue_code",
+        "severity",
+        "affected_ids",
+        "evidence",
+        "explanation",
+        "correction_goal"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "QuoteRef": {
+      "additionalProperties": false,
+      "properties": {
+        "text_key": {
+          "minLength": 1,
+          "title": "Text Key",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Block Id"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text_key",
+        "block_id",
+        "quote",
+        "occurrence"
+      ],
+      "title": "QuoteRef",
+      "type": "object"
+    },
+    "ComparisonDifference": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "enum": [
+            "legitimate_alternative",
+            "candidate_defect",
+            "reference_defect",
+            "uncertain"
+          ],
+          "title": "Classification",
+          "type": "string"
+        },
+        "source_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Source Quotes",
+          "type": "array"
+        },
+        "candidate_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Candidate Quotes",
+          "type": "array"
+        },
+        "reference_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Reference Quotes",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "correction_goal": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Goal"
+        },
+        "critical": {
+          "title": "Critical",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "classification",
+        "explanation"
+      ],
+      "title": "ComparisonDifference",
+      "type": "object"
+    },
+    "ReferenceComparisonPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "reference_comparison"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "compatible",
+            "incompatible",
+            "unknown"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "differences": {
+          "items": {
+            "$ref": "#/$defs/ComparisonDifference"
+          },
+          "title": "Differences",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result",
+        "differences",
+        "explanation"
+      ],
+      "title": "ReferenceComparisonPayload",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "enum": [
+        "reference_quality",
+        "candidate_quality"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "criteria": {
+      "items": {
+        "$ref": "#/$defs/Criterion"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Criteria",
+      "type": "array"
+    },
+    "reference_comparison": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReferenceComparisonPayload"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reference Comparison"
+    }
+  },
+  "required": [
+    "mode",
+    "criteria"
+  ],
+  "title": "QualityEvaluationPayload",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

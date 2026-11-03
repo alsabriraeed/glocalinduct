@@ -1,0 +1,322 @@
+{
+  "$defs": {
+    "Alignment": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment_id": {
+          "minLength": 1,
+          "title": "Alignment Id",
+          "type": "string"
+        },
+        "item_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Item Ids",
+          "type": "array"
+        },
+        "source_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Source Quotes",
+          "type": "array"
+        },
+        "target_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Target Quotes",
+          "type": "array"
+        },
+        "observation": {
+          "enum": [
+            "retain",
+            "substitute",
+            "ordinary_translation",
+            "stylistic_change",
+            "omission",
+            "addition",
+            "unresolved"
+          ],
+          "title": "Observation",
+          "type": "string"
+        },
+        "preserved_requirement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Preserved Requirement Ids",
+          "type": "array"
+        },
+        "violated_requirement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Violated Requirement Ids",
+          "type": "array"
+        },
+        "uncertainty": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uncertainty"
+        },
+        "note": {
+          "minLength": 1,
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alignment_id",
+        "item_ids",
+        "source_quotes",
+        "target_quotes",
+        "observation",
+        "preserved_requirement_ids",
+        "violated_requirement_ids",
+        "uncertainty",
+        "note"
+      ],
+      "title": "Alignment",
+      "type": "object"
+    },
+    "QuoteRef": {
+      "additionalProperties": false,
+      "properties": {
+        "text_key": {
+          "minLength": 1,
+          "title": "Text Key",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Block Id"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text_key",
+        "block_id",
+        "quote",
+        "occurrence"
+      ],
+      "title": "QuoteRef",
+      "type": "object"
+    },
+    "Scope": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "enum": [
+            "universal",
+            "domain",
+            "context"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "domains": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Domains",
+          "type": "array"
+        },
+        "genres": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Genres",
+          "type": "array"
+        },
+        "culture_specific": {
+          "title": "Culture Specific",
+          "type": "boolean"
+        },
+        "locale_scope": {
+          "enum": [
+            "general_arab",
+            "specified",
+            "unspecified"
+          ],
+          "title": "Locale Scope",
+          "type": "string"
+        },
+        "locales": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Locales",
+          "type": "array"
+        },
+        "setting": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting"
+        },
+        "time_period": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Time Period"
+        },
+        "cross_domain_transfer": {
+          "title": "Cross Domain Transfer",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "level",
+        "domains",
+        "genres",
+        "culture_specific",
+        "locale_scope",
+        "locales",
+        "setting",
+        "time_period",
+        "cross_domain_transfer"
+      ],
+      "title": "Scope",
+      "type": "object"
+    },
+    "SourceOmissionFlag": {
+      "additionalProperties": false,
+      "properties": {
+        "source_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "minItems": 1,
+          "title": "Source Quotes",
+          "type": "array"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_quotes",
+        "description"
+      ],
+      "title": "SourceOmissionFlag",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "alignments": {
+      "items": {
+        "$ref": "#/$defs/Alignment"
+      },
+      "title": "Alignments",
+      "type": "array"
+    },
+    "proposed_scope": {
+      "$ref": "#/$defs/Scope"
+    },
+    "scope_evidence": {
+      "items": {
+        "$ref": "#/$defs/QuoteRef"
+      },
+      "title": "Scope Evidence",
+      "type": "array"
+    },
+    "covered_source_block_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Covered Source Block Ids",
+      "type": "array"
+    },
+    "covered_target_block_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Covered Target Block Ids",
+      "type": "array"
+    },
+    "unresolved_regions": {
+      "items": {
+        "$ref": "#/$defs/QuoteRef"
+      },
+      "title": "Unresolved Regions",
+      "type": "array"
+    },
+    "newly_noticed_source_items": {
+      "items": {
+        "$ref": "#/$defs/SourceOmissionFlag"
+      },
+      "title": "Newly Noticed Source Items",
+      "type": "array"
+    },
+    "coverage_notes": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Coverage Notes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "alignments",
+    "proposed_scope",
+    "scope_evidence",
+    "covered_source_block_ids",
+    "covered_target_block_ids",
+    "unresolved_regions",
+    "newly_noticed_source_items",
+    "coverage_notes"
+  ],
+  "title": "PairAnalysisPayload",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

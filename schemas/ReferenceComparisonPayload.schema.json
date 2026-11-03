@@ -1,0 +1,150 @@
+{
+  "$defs": {
+    "ComparisonDifference": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "enum": [
+            "legitimate_alternative",
+            "candidate_defect",
+            "reference_defect",
+            "uncertain"
+          ],
+          "title": "Classification",
+          "type": "string"
+        },
+        "source_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Source Quotes",
+          "type": "array"
+        },
+        "candidate_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Candidate Quotes",
+          "type": "array"
+        },
+        "reference_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Reference Quotes",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "correction_goal": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Goal"
+        },
+        "critical": {
+          "title": "Critical",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "classification",
+        "source_quotes",
+        "candidate_quotes",
+        "reference_quotes",
+        "explanation",
+        "correction_goal",
+        "critical"
+      ],
+      "title": "ComparisonDifference",
+      "type": "object"
+    },
+    "QuoteRef": {
+      "additionalProperties": false,
+      "properties": {
+        "text_key": {
+          "minLength": 1,
+          "title": "Text Key",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Block Id"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text_key",
+        "block_id",
+        "quote",
+        "occurrence"
+      ],
+      "title": "QuoteRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "const": "reference_comparison",
+      "title": "Mode",
+      "type": "string"
+    },
+    "result": {
+      "enum": [
+        "compatible",
+        "incompatible",
+        "unknown"
+      ],
+      "title": "Result",
+      "type": "string"
+    },
+    "differences": {
+      "items": {
+        "$ref": "#/$defs/ComparisonDifference"
+      },
+      "title": "Differences",
+      "type": "array"
+    },
+    "explanation": {
+      "minLength": 1,
+      "title": "Explanation",
+      "type": "string"
+    }
+  },
+  "required": [
+    "mode",
+    "result",
+    "differences",
+    "explanation"
+  ],
+  "title": "ReferenceComparisonPayload",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

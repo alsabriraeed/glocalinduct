@@ -1,0 +1,269 @@
+{
+  "$defs": {
+    "InsightContent": {
+      "additionalProperties": false,
+      "properties": {
+        "lesson": {
+          "minLength": 1,
+          "title": "Lesson",
+          "type": "string"
+        },
+        "applies_when": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Applies When",
+          "type": "array"
+        },
+        "avoid_when": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Avoid When",
+          "type": "array"
+        },
+        "recommended_strategy": {
+          "anyOf": [
+            {
+              "enum": [
+                "retain",
+                "substitute"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Recommended Strategy"
+        },
+        "preserve": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Preserve",
+          "type": "array"
+        },
+        "scope": {
+          "$ref": "#/$defs/Scope"
+        },
+        "support_experience_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Support Experience Ids",
+          "type": "array"
+        },
+        "counterevidence_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Counterevidence Ids",
+          "type": "array"
+        },
+        "origin": {
+          "enum": [
+            "reference",
+            "attempt",
+            "mixed"
+          ],
+          "title": "Origin",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lesson",
+        "applies_when",
+        "avoid_when",
+        "recommended_strategy",
+        "preserve",
+        "scope",
+        "support_experience_ids",
+        "counterevidence_ids",
+        "origin"
+      ],
+      "title": "InsightContent",
+      "type": "object"
+    },
+    "Scope": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "enum": [
+            "universal",
+            "domain",
+            "context"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "domains": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Domains",
+          "type": "array"
+        },
+        "genres": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Genres",
+          "type": "array"
+        },
+        "culture_specific": {
+          "title": "Culture Specific",
+          "type": "boolean"
+        },
+        "locale_scope": {
+          "enum": [
+            "general_arab",
+            "specified",
+            "unspecified"
+          ],
+          "title": "Locale Scope",
+          "type": "string"
+        },
+        "locales": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Locales",
+          "type": "array"
+        },
+        "setting": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting"
+        },
+        "time_period": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Time Period"
+        },
+        "cross_domain_transfer": {
+          "title": "Cross Domain Transfer",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "level",
+        "domains",
+        "genres",
+        "culture_specific",
+        "locale_scope",
+        "locales",
+        "setting",
+        "time_period",
+        "cross_domain_transfer"
+      ],
+      "title": "Scope",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "insight_id": {
+      "minLength": 1,
+      "title": "Insight Id",
+      "type": "string"
+    },
+    "version": {
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "content": {
+      "$ref": "#/$defs/InsightContent"
+    },
+    "importance": {
+      "minimum": 0,
+      "title": "Importance",
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "provisional",
+        "active",
+        "retired"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "support_group_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Support Group Ids",
+      "type": "array"
+    },
+    "support_domains": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Support Domains",
+      "type": "array"
+    },
+    "unresolved_counterevidence": {
+      "title": "Unresolved Counterevidence",
+      "type": "boolean"
+    },
+    "review_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Review Ids",
+      "type": "array"
+    },
+    "event_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Event Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "insight_id",
+    "version",
+    "content",
+    "importance",
+    "status",
+    "support_group_ids",
+    "support_domains",
+    "unresolved_counterevidence",
+    "review_ids",
+    "event_ids"
+  ],
+  "title": "InsightRecord",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

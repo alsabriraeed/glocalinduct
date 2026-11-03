@@ -1,0 +1,99 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "domains": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+    },
+    "genre": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Genre"
+    },
+    "audience": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Audience"
+    },
+    "locale_scope": {
+      "enum": [
+        "general_arab",
+        "specified",
+        "unspecified"
+      ],
+      "title": "Locale Scope",
+      "type": "string"
+    },
+    "locales": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Locales",
+      "type": "array"
+    },
+    "setting": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Setting"
+    },
+    "time_period": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Time Period"
+    },
+    "objectives": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Objectives",
+      "type": "array"
+    }
+  },
+  "required": [
+    "domains",
+    "genre",
+    "audience",
+    "locale_scope",
+    "locales",
+    "setting",
+    "time_period",
+    "objectives"
+  ],
+  "title": "Context",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

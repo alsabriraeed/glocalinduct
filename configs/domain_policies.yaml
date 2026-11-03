@@ -1,0 +1,81 @@
+schema_version: '1.0'
+combination_rule: union_of_preservation_requirements
+on_conflict: preserve_and_record_uncertainty
+unknown_domain_policy: shared
+shared:
+  preserve:
+  - communicative purpose
+  - essential meaning and named subjects
+  - factual identities and attribution
+  - quantities units and relationships
+  - chronology modality uncertainty and scope
+  - required structure and quoted material
+  substitution_rule: incidental item plus eligible compatible corpus support
+  strategies:
+  - retain
+  - substitute
+domains:
+  science:
+  - scientific claims
+  - causal mechanisms
+  - equations symbols units and values
+  - uncertainty
+  engineering:
+  - technical constraints
+  - procedures
+  - specifications
+  - safety conditions
+  - code and notation
+  history:
+  - real identities and places
+  - chronology
+  - historical setting
+  - attribution and perspective
+  social_studies:
+  - institutional distinctions
+  - social context
+  - attribution
+  - fact versus interpretation
+  arts:
+  - work and creator identities
+  - central symbolism
+  - quoted material
+  - interpretation constraints
+  humanities:
+  - argument structure
+  - attribution
+  - quoted material
+  - conceptual distinctions
+  business:
+  - actual parties and products
+  - prices dates and commitments
+  - factual claims
+  - intended action
+  law:
+  - jurisdiction
+  - obligations
+  - conditions
+  - named parties
+  - technical meaning
+  finance:
+  - amounts and assumptions
+  - risk statements
+  - conditions
+  - time basis
+  - technical meaning
+  health:
+  - technical meaning
+  - procedural conditions
+  - quantities
+  - uncertainty
+  - eligibility
+  education:
+  - supplied objectives
+  - subject facts
+  - assessment logic
+  - required difficulty and answers
+  fiction:
+  - plot and narrative world
+  - characters and relationships
+  - authorial constraints
+  general: []

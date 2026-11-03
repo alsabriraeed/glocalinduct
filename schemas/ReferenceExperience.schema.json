@@ -1,0 +1,170 @@
+{
+  "$defs": {
+    "Scope": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "enum": [
+            "universal",
+            "domain",
+            "context"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "domains": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Domains",
+          "type": "array"
+        },
+        "genres": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Genres",
+          "type": "array"
+        },
+        "culture_specific": {
+          "title": "Culture Specific",
+          "type": "boolean"
+        },
+        "locale_scope": {
+          "enum": [
+            "general_arab",
+            "specified",
+            "unspecified"
+          ],
+          "title": "Locale Scope",
+          "type": "string"
+        },
+        "locales": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Locales",
+          "type": "array"
+        },
+        "setting": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting"
+        },
+        "time_period": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Time Period"
+        },
+        "cross_domain_transfer": {
+          "title": "Cross Domain Transfer",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "level",
+        "domains",
+        "genres",
+        "culture_specific",
+        "locale_scope",
+        "locales",
+        "setting",
+        "time_period",
+        "cross_domain_transfer"
+      ],
+      "title": "Scope",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "const": "reference_example",
+      "title": "Kind",
+      "type": "string"
+    },
+    "pair_id": {
+      "minLength": 1,
+      "title": "Pair Id",
+      "type": "string"
+    },
+    "group_id": {
+      "minLength": 1,
+      "title": "Group Id",
+      "type": "string"
+    },
+    "source_text_id": {
+      "minLength": 1,
+      "title": "Source Text Id",
+      "type": "string"
+    },
+    "source_profile_id": {
+      "minLength": 1,
+      "title": "Source Profile Id",
+      "type": "string"
+    },
+    "arabic_text_id": {
+      "minLength": 1,
+      "title": "Arabic Text Id",
+      "type": "string"
+    },
+    "pair_analysis_id": {
+      "minLength": 1,
+      "title": "Pair Analysis Id",
+      "type": "string"
+    },
+    "quality_report_id": {
+      "minLength": 1,
+      "title": "Quality Report Id",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/Scope"
+    },
+    "eligible": {
+      "title": "Eligible",
+      "type": "boolean"
+    },
+    "exclusion_reasons": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Exclusion Reasons",
+      "type": "array"
+    }
+  },
+  "required": [
+    "kind",
+    "pair_id",
+    "group_id",
+    "source_text_id",
+    "source_profile_id",
+    "arabic_text_id",
+    "pair_analysis_id",
+    "quality_report_id",
+    "scope",
+    "eligible",
+    "exclusion_reasons"
+  ],
+  "title": "ReferenceExperience",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,66 @@
+schema_version: "1.0"
+language: {source: en, target: ar, variety: MSA}
+paths:
+  data_root: data/full_dataset.xlsx
+  database: workspace/staging/memory.sqlite3
+  source_store: workspace/source_store
+  private_references: workspace/private_references
+  releases: workspace/releases
+  runs: workspace/runs
+pair_id_pattern: '^(?P<pair_id>[A-Za-z0-9][A-Za-z0-9-]*)(?:__(?P<title>.+))?$'
+split:
+  learning: 0.805
+  development: 0.10
+  test: 0.095
+  seed: 42
+seed_fraction_of_learning: 0.00621118  # 0.5% Seed + 80% Practice (out of 80.5% learning pool)
+near_duplicate_jaccard: 0.85
+windows: {content_tokens: 2400, context_tokens_each_side: 200}
+insights:
+  batch_size: 8
+  min_support_groups: 2
+  universal_min_domains: 2
+  initial_importance: 2
+retrieval:
+  insights: 10             # top 10 active insights
+  experiences: 10          # top 10 retrieved examples
+  candidate_pool: 30
+  similarity: cosine
+  similarity_threshold: null
+  query_mode: source_text  # embed the raw source text, as ExpeL embeds the task
+  embedder: sentence-transformers
+  embedder_model: sentence-transformers/all-mpnet-base-v2
+  embedder_device: cuda    # GPU; use auto to fall back to CPU when no GPU is visible
+  knn_backend: faiss       # exact IndexFlatIP; falls back to python if faiss is unavailable
+  insight_scope_filter: true
+learning:                  # ExpeL (Zhao et al., 2024) alignment; see docs/DEPARTURES.md
+  reference_demonstrations: true   # admit seed references as demonstrations and extract initial insights
+  success_signal: reference_comparison   # success == private reference comparison is 'compatible'
+  insight_admission: immediate      # ADD is active at once (no provisional state)
+  reflection: free_text             # LLM_reflect writes a natural-language diagnosis for the next attempt
+  pair_every_failure: true          # every failed attempt is paired with a success of the same task
+  insight_substitution: true        # an active insight may justify a substitution (rules drive the agent, as in ExpeL)
+attempts: {practice: 10, deployment: 1}
+evaluation: {min_criterion_score: 3}
+reliability:
+  technical_retries: 2
+  schema_corrections: 1
+  call_timeout_seconds: 120
+budgets:
+  short_request_seconds: 1800
+  max_calls_per_window: 80
+  max_calls_per_document: null
+  max_tokens_per_document: null
+  max_cost_per_document: null
+  long_document_seconds: 3600
+runtime:
+  provider: null
+  generation_model: null
+  evaluation_model: null
+  embedding_model: null
+  tokenizer: null
+  context_window_tokens: null
+  reserved_output_tokens: null
+  temperature: 0
+  api_key_environment_variable: GLOCALINDUCT_API_KEY
+  require_runtime_fields_before_real_calls: true

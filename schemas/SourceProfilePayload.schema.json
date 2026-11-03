@@ -1,0 +1,292 @@
+{
+  "$defs": {
+    "CulturalItem": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "minLength": 1,
+          "title": "Item Id",
+          "type": "string"
+        },
+        "category": {
+          "minLength": 1,
+          "title": "Category",
+          "type": "string"
+        },
+        "source_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "minItems": 1,
+          "title": "Source Quotes",
+          "type": "array"
+        },
+        "semantic_function": {
+          "minLength": 1,
+          "title": "Semantic Function",
+          "type": "string"
+        },
+        "essentiality": {
+          "enum": [
+            "essential",
+            "incidental",
+            "uncertain"
+          ],
+          "title": "Essentiality",
+          "type": "string"
+        },
+        "factual_role": {
+          "minLength": 1,
+          "title": "Factual Role",
+          "type": "string"
+        },
+        "requirement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Requirement Ids",
+          "type": "array"
+        },
+        "depends_on_item_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Depends On Item Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "item_id",
+        "category",
+        "source_quotes",
+        "semantic_function",
+        "essentiality",
+        "factual_role",
+        "requirement_ids",
+        "depends_on_item_ids"
+      ],
+      "title": "CulturalItem",
+      "type": "object"
+    },
+    "DomainTag": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "minLength": 1,
+          "title": "Domain",
+          "type": "string"
+        },
+        "basis": {
+          "enum": [
+            "supplied",
+            "inferred"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "domain",
+        "basis",
+        "evidence"
+      ],
+      "title": "DomainTag",
+      "type": "object"
+    },
+    "QuoteRef": {
+      "additionalProperties": false,
+      "properties": {
+        "text_key": {
+          "minLength": 1,
+          "title": "Text Key",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Block Id"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text_key",
+        "block_id",
+        "quote",
+        "occurrence"
+      ],
+      "title": "QuoteRef",
+      "type": "object"
+    },
+    "Requirement": {
+      "additionalProperties": false,
+      "properties": {
+        "requirement_id": {
+          "minLength": 1,
+          "title": "Requirement Id",
+          "type": "string"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "source_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "title": "Source Quotes",
+          "type": "array"
+        },
+        "metadata_field": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Metadata Field"
+        },
+        "protected": {
+          "title": "Protected",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "requirement_id",
+        "kind",
+        "description",
+        "source_quotes",
+        "metadata_field",
+        "protected"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "purpose": {
+      "minLength": 1,
+      "title": "Purpose",
+      "type": "string"
+    },
+    "purpose_basis": {
+      "enum": [
+        "supplied",
+        "inferred",
+        "uncertain"
+      ],
+      "title": "Purpose Basis",
+      "type": "string"
+    },
+    "domains": {
+      "items": {
+        "$ref": "#/$defs/DomainTag"
+      },
+      "minItems": 1,
+      "title": "Domains",
+      "type": "array"
+    },
+    "genre": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Genre"
+    },
+    "audience": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Audience"
+    },
+    "requirements": {
+      "items": {
+        "$ref": "#/$defs/Requirement"
+      },
+      "title": "Requirements",
+      "type": "array"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/CulturalItem"
+      },
+      "title": "Items",
+      "type": "array"
+    },
+    "covered_block_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Covered Block Ids",
+      "type": "array"
+    },
+    "uncertainties": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Uncertainties",
+      "type": "array"
+    }
+  },
+  "required": [
+    "purpose",
+    "purpose_basis",
+    "domains",
+    "genre",
+    "audience",
+    "requirements",
+    "items",
+    "covered_block_ids",
+    "uncertainties"
+  ],
+  "title": "SourceProfilePayload",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

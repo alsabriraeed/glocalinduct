@@ -1,0 +1,97 @@
+{
+  "$defs": {
+    "OperationReview": {
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "minLength": 1,
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/ReviewCheck"
+          },
+          "maxItems": 5,
+          "minItems": 5,
+          "title": "Checks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operation_id",
+        "checks"
+      ],
+      "title": "OperationReview",
+      "type": "object"
+    },
+    "ReviewCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "check": {
+          "enum": [
+            "evidence_support",
+            "applicability",
+            "scope",
+            "preservation",
+            "contradiction_handling"
+          ],
+          "title": "Check",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "experience_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Experience Ids",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check",
+        "status",
+        "experience_ids",
+        "explanation"
+      ],
+      "title": "ReviewCheck",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "const": "insight_review",
+      "title": "Mode",
+      "type": "string"
+    },
+    "reviews": {
+      "items": {
+        "$ref": "#/$defs/OperationReview"
+      },
+      "title": "Reviews",
+      "type": "array"
+    }
+  },
+  "required": [
+    "mode",
+    "reviews"
+  ],
+  "title": "InsightReviewPayload",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

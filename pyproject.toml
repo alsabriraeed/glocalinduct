@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glocalinduct"
+version = "0.1.0"
+description = "GlocalInduct: experiential (ExpeL-style) English-to-Arabic glocalization with five agent roles and two versioned memories"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.6,<3",
+    "PyYAML>=6.0",
+    "python-docx>=1.1",
+    "pypdf>=4.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "python-multipart>=0.0.9",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.40"]
+# ExpeL-style retrieval: all-mpnet-base-v2 embeddings + FAISS IndexFlatIP (torch 2.14.1 CUDA 12.6 wheel is installed first, see Dockerfile)
+semantic = ["sentence-transformers==6.2.0", "faiss-cpu==1.15.1", "numpy==2.4.6"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+glocalinduct = "glocalinduct.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

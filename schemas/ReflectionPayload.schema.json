@@ -1,0 +1,23 @@
+{
+  "additionalProperties": false,
+  "description": "Output of the failure-reflection agent: a short natural-language diagnosis for the next attempt.",
+  "properties": {
+    "mode": {
+      "const": "reflect_failure",
+      "title": "Mode",
+      "type": "string"
+    },
+    "reflection": {
+      "minLength": 1,
+      "title": "Reflection",
+      "type": "string"
+    }
+  },
+  "required": [
+    "mode",
+    "reflection"
+  ],
+  "title": "ReflectionPayload",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

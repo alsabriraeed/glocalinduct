@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: glocalinduct
+Version: 0.1.0
+Summary: GlocalInduct: experiential (ExpeL-style) English-to-Arabic glocalization with five agent roles and two versioned memories
+Requires-Python: >=3.11
+Requires-Dist: pydantic<3,>=2.6
+Requires-Dist: PyYAML>=6.0
+Requires-Dist: python-docx>=1.1
+Requires-Dist: pypdf>=4.0
+Requires-Dist: fastapi>=0.110
+Requires-Dist: uvicorn>=0.27
+Requires-Dist: python-multipart>=0.0.9
+Requires-Dist: httpx>=0.27
+Provides-Extra: anthropic
+Requires-Dist: anthropic>=0.40; extra == "anthropic"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"

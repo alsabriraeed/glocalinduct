@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "ArabicBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "source_block_id": {
+          "minLength": 1,
+          "title": "Source Block Id",
+          "type": "string"
+        },
+        "text_ar": {
+          "minLength": 1,
+          "title": "Text Ar",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_block_id",
+        "text_ar"
+      ],
+      "title": "ArabicBlock",
+      "type": "object"
+    },
+    "ItemRealization": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "minLength": 1,
+          "title": "Item Id",
+          "type": "string"
+        },
+        "output_quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteRef"
+          },
+          "minItems": 1,
+          "title": "Output Quotes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "item_id",
+        "output_quotes"
+      ],
+      "title": "ItemRealization",
+      "type": "object"
+    },
+    "QuoteRef": {
+      "additionalProperties": false,
+      "properties": {
+        "text_key": {
+          "minLength": 1,
+          "title": "Text Key",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Block Id"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text_key",
+        "block_id",
+        "quote",
+        "occurrence"
+      ],
+      "title": "QuoteRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "blocks": {
+      "items": {
+        "$ref": "#/$defs/ArabicBlock"
+      },
+      "minItems": 1,
+      "title": "Blocks",
+      "type": "array"
+    },
+    "realizations": {
+      "items": {
+        "$ref": "#/$defs/ItemRealization"
+      },
+      "title": "Realizations",
+      "type": "array"
+    },
+    "unresolved_issues": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Unresolved Issues",
+      "type": "array"
+    }
+  },
+  "required": [
+    "blocks",
+    "realizations",
+    "unresolved_issues"
+  ],
+  "title": "CandidatePayload",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,67 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: glocalinduct-ollama
+    volumes:
+      - ./workspace/ollama:/root/.ollama
+      - /usr/lib/x86_64-linux-gnu/libcuda.so.1:/usr/lib/x86_64-linux-gnu/libcuda.so.1:ro
+      - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:ro
+      - /usr/lib/x86_64-linux-gnu/libnvidia-ptxjitcompiler.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ptxjitcompiler.so.1:ro
+    devices:
+      - /dev/nvidiactl
+      - /dev/nvidia-uvm
+      - /dev/nvidia-uvm-tools
+      - /dev/nvidia0
+      - /dev/nvidia1
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_CONTEXT_LENGTH=32768
+    restart: unless-stopped
+
+  glocalinduct:
+    build: .
+    container_name: glocalinduct
+    depends_on:
+      - ollama
+    ports:
+      - "${PORT:-8005}:${PORT:-8005}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["glocalinduct", "serve", "--host", "0.0.0.0", "--port", "${PORT:-8005}"]
+    volumes:
+      - ./workspace:/app/workspace
+      - ./data:/app/data
+      - ./configs:/app/configs
+      - ./src:/app/src
+      - ./prompts:/app/prompts
+      - ./workspace/hf_cache:/root/.cache/huggingface   # keeps the embedding model across rebuilds
+      # GPU without the NVIDIA Container Toolkit: the CUDA runtime ships inside the torch wheel, only the
+      # driver's libcuda / ptx JIT libraries come from the host (symlinks resolve to the installed driver).
+      - /usr/lib/x86_64-linux-gnu/libcuda.so.1:/usr/lib/x86_64-linux-gnu/libcuda.so.1:ro
+      - /usr/lib/x86_64-linux-gnu/libnvidia-ptxjitcompiler.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ptxjitcompiler.so.1:ro
+    devices:
+      - /dev/nvidiactl
+      - /dev/nvidia-uvm
+      - /dev/nvidia-uvm-tools
+      - /dev/nvidia${GLOCALINDUCT_GPU:-0}   # which GPU the app uses (default 0)
+    env_file:
+      - .env
+    environment:
+      - PORT=${PORT:-8008}
+      - OLLAMA_HOST=http://ollama:11434
+      - GLOCALINDUCT_MODEL=${GLOCALINDUCT_MODEL:-}
+      - GLOCALINDUCT_PROVIDER=${GLOCALINDUCT_PROVIDER:-openai}
+      - GLOCALINDUCT_API_KEY=${GLOCALINDUCT_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GLOCALINDUCT_GENERATION_MODEL=${GLOCALINDUCT_GENERATION_MODEL:-gpt-4o}
+      - GLOCALINDUCT_EVALUATION_MODEL=${GLOCALINDUCT_EVALUATION_MODEL:-gpt-4o}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen3.8}
+      - GLOCALINDUCT_TEMPERATURE=${GLOCALINDUCT_TEMPERATURE:-0.0}
+      - GLOCALINDUCT_BASE_URL=${GLOCALINDUCT_BASE_URL:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434/v1}
+      - GLOCALINDUCT_REASONING_EFFORT=${GLOCALINDUCT_REASONING_EFFORT:-none}
+      - GLOCALINDUCT_CONTEXT_WINDOW=${GLOCALINDUCT_CONTEXT_WINDOW:-128000}
+      - GLOCALINDUCT_RESERVED_OUTPUT=${GLOCALINDUCT_RESERVED_OUTPUT:-16384}
+    restart: unless-stopped
